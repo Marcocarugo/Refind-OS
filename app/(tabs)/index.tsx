@@ -1,31 +1,19 @@
-import { StyleSheet } from 'react-native';
+import { FontAwesome6 } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Moment, useRefind } from '../../src/store/useRefind';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
-
-export default function TabOneScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
-  );
+function MomentCard({ item }: { item: Moment }) {
+  const { toggleSaved, sendMomentSignal } = useRefind();
+  const signal = () => { if (!item.signalled) { sendMomentSignal(item.id); Alert.alert('Segnale silenzioso inviato', 'Resterà invisibile finché una persona di questo momento non ricambia.'); } };
+  return <View style={styles.card}><View style={[styles.art, { backgroundColor:item.palette }]}><View style={styles.ringA}/><View style={styles.ringB}/><View style={styles.dot}/><Text style={styles.people}>{item.people} echi</Text></View><View style={styles.body}><View style={styles.top}><Text style={styles.time}>{item.time}</Text><Text style={styles.expires}>{item.expires}</Text></View><Text style={styles.title}>{item.title}</Text><Text style={styles.context}>⌖  {item.context}</Text><Text style={styles.duration}>{item.duration}</Text><View style={styles.actions}><Pressable accessibilityLabel="Salva momento" onPress={() => toggleSaved(item.id)} style={styles.bookmark}><FontAwesome6 name="bookmark" solid={item.saved} size={15} color={item.saved ? '#4938E8' : '#77778A'} /></Pressable><Pressable onPress={signal} style={[styles.signal,item.signalled&&styles.signalSent]}><FontAwesome6 name={item.signalled?'check':'sparkles'} size={12} color={item.signalled?'#17734F':'#FFF'}/><Text style={[styles.signalText,item.signalled&&styles.signalTextSent]}>{item.signalled?'Segnale inviato':'Invia un segnale'}</Text></Pressable></View></View></View>;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
+export default function EchoesScreen() {
+  const { moments, matches } = useRefind(); const router = useRouter();
+  return <SafeAreaView style={styles.screen} edges={['top']}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}><View style={styles.header}><View><Text style={styles.kicker}>IL TUO DIGEST · OGGI</Text><Text style={styles.heading}>I tuoi echi</Text></View><Pressable onPress={() => router.push('/matches')} style={styles.bell}><FontAwesome6 name="bell" size={17} color="#242433"/><View style={styles.badge}><Text style={styles.badgeText}>{matches.length}</Text></View></Pressable></View><View style={styles.hero}><View style={styles.glow}/><Text style={styles.heroKicker}>IL MONDO È PIÙ VICINO</Text><Text style={styles.heroTitle}>Oggi hai sfiorato{`\n`}12 possibilità.</Text><Text style={styles.heroText}>Gli echi non mostrano mai posizioni o identità reali.</Text><Pressable onPress={() => router.push('/live')} style={styles.liveLink}><View style={styles.liveDot}/><Text style={styles.liveText}>Guarda chi è qui</Text><FontAwesome6 name="arrow-right" size={12} color="#FFF"/></Pressable></View><View style={styles.sectionHead}><Text style={styles.section}>MOMENTI CONDIVISI</Text><Text style={styles.count}>{moments.length} disponibili</Text></View>{moments.map((item) => <MomentCard key={item.id} item={item}/>)}<View style={styles.privacy}><FontAwesome6 name="shield-heart" size={17} color="#4938E8"/><Text style={styles.privacyText}>Double-blind by design. Nessuno scopre il tuo interesse senza una scelta reciproca.</Text></View></ScrollView></SafeAreaView>;
+}
+
+const styles=StyleSheet.create({screen:{flex:1,backgroundColor:'#F7F7FB'},content:{padding:20,paddingBottom:34},header:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:5,marginBottom:22},kicker:{fontSize:10,letterSpacing:1.3,color:'#858598',fontWeight:'800'},heading:{fontSize:32,letterSpacing:-1.3,color:'#21212E',fontWeight:'800',marginTop:3},bell:{width:44,height:44,borderRadius:22,backgroundColor:'#FFF',alignItems:'center',justifyContent:'center'},badge:{position:'absolute',top:-2,right:-2,minWidth:17,height:17,borderRadius:9,backgroundColor:'#FF5C6C',alignItems:'center',justifyContent:'center',borderWidth:2,borderColor:'#F7F7FB'},badgeText:{color:'#FFF',fontSize:9,fontWeight:'800'},hero:{backgroundColor:'#4938E8',minHeight:218,borderRadius:28,padding:23,overflow:'hidden',marginBottom:29},glow:{position:'absolute',height:190,width:190,borderRadius:95,backgroundColor:'#786CFF',right:-42,top:-47},heroKicker:{color:'#C9C5FF',fontSize:10,letterSpacing:1.3,fontWeight:'800'},heroTitle:{color:'#FFF',fontSize:27,fontWeight:'800',lineHeight:31,letterSpacing:-1,marginTop:10},heroText:{color:'#D7D4FF',fontSize:13,lineHeight:18,marginTop:9,maxWidth:'86%'},liveLink:{backgroundColor:'#262052',alignSelf:'flex-start',paddingHorizontal:14,height:38,borderRadius:19,flexDirection:'row',alignItems:'center',gap:8,marginTop:16},liveDot:{width:7,height:7,backgroundColor:'#5AE0B5',borderRadius:9},liveText:{color:'#FFF',fontWeight:'800',fontSize:12},sectionHead:{flexDirection:'row',justifyContent:'space-between',marginBottom:12},section:{color:'#5D5D70',fontSize:10,fontWeight:'800',letterSpacing:1.2},count:{color:'#9797A6',fontSize:11,fontWeight:'600'},card:{backgroundColor:'#FFF',borderRadius:24,marginBottom:15,overflow:'hidden'},art:{height:92,overflow:'hidden',justifyContent:'flex-end',padding:13},ringA:{width:140,height:140,borderRadius:70,borderWidth:1,borderColor:'rgba(73,56,232,.18)',position:'absolute',right:-18,top:-65},ringB:{width:95,height:95,borderRadius:50,borderWidth:1,borderColor:'rgba(73,56,232,.22)',position:'absolute',right:6,top:-42},dot:{width:11,height:11,borderRadius:6,backgroundColor:'#4938E8',position:'absolute',right:49,top:19},people:{fontSize:11,fontWeight:'800',color:'#4938E8',letterSpacing:.4},body:{padding:16},top:{flexDirection:'row',justifyContent:'space-between'},time:{color:'#818193',fontSize:11,fontWeight:'700'},expires:{color:'#AD6070',fontSize:10,fontWeight:'700'},title:{fontSize:20,color:'#282839',letterSpacing:-.5,fontWeight:'800',marginTop:6},context:{color:'#77778A',fontSize:12,marginTop:4},duration:{color:'#9B9BAD',fontSize:11,marginTop:5},actions:{flexDirection:'row',alignItems:'center',marginTop:15,gap:10},bookmark:{width:39,height:39,borderRadius:20,backgroundColor:'#F4F3FF',alignItems:'center',justifyContent:'center'},signal:{height:39,borderRadius:20,paddingHorizontal:15,backgroundColor:'#4938E8',flexDirection:'row',alignItems:'center',gap:7},signalSent:{backgroundColor:'#E3F8EE'},signalText:{color:'#FFF',fontWeight:'800',fontSize:12},signalTextSent:{color:'#17734F'},privacy:{borderRadius:18,backgroundColor:'#EFEEFF',padding:16,flexDirection:'row',gap:11,marginTop:4},privacyText:{flex:1,color:'#5D5893',lineHeight:17,fontSize:11,fontWeight:'600'}});

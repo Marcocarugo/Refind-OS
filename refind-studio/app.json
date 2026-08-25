@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "ReFind Studio",
+    "slug": "refind-studio",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "refindstudio",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"]
+  }
+}
